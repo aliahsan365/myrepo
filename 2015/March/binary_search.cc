@@ -8,10 +8,9 @@ int posicio(double x, const vector<double>& v, int esq, int dre){
     else if (x == v[pos]) return pos; 
     else if (x > v[pos]) return posicio(x,v,pos+1,dre);
     else return posicio(x,v,esq,pos-1);
-    
+
 }
 
-*
 void read_vector(vector<double> &v) {
     int n = v.size();
     for (int i = 0; i < n; ++i) cin >> v[i];
