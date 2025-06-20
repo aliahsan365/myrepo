@@ -12,12 +12,6 @@ void swap(vector<int>& v, int i, int j) {
 
 //Does find the position of the smallest element from init position to N. 
 //Modifications are not allowed (Read Only).
-void swap(vector<int>& v, int i, int j) {
-    int tmp = v[j];
-    v[j] = v[i];
-    v[i] = tmp;
-}
-
 int find_smallest_pos(const vector<int>& v, int ini) {
     int pos = ini;
     int n = v.size();
