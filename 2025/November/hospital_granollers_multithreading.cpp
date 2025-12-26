@@ -15,41 +15,44 @@ using namespace std;
 
 //Each room has a nurse in it. When a nurse ends dealing with patient,
 //asks to next patient to enter the room by pressing "next patient" button.
-//This process is done asynchrounsly
-//In this example, this action is simulated with a timeout (line 42)
+//This step and the entair process is done asynchrounsly by each nurse in a room.
+
+//In this example, this process is simulated with a timeout.
 //Each worker thread represents a nurse in a room. 
-//The exact dealing time  is not fixed. 
+//The exact dealing time for each patient is not fixed. 
 //Effective working time for each patient goes within a range of 5-10seconds(just a simulation) 
 //Each nurse deals with exactly MAX_PATIENTS_DAY. After that, goes off duty.
+//----------------------------------------------------------------------
 
-//This program garantees no race conditions when asking a patient to go to a room. 
-//This means, even if next button simulation happens at exact
-//same time, only one patient goes to exactly one room, at the time.
 
 //This program is using C++11 standard library only.
-//----------------------------------------------------------------------
+//This program garantees no race conditions when asking a patient to go to a room. 
+//This means, only one patient goes to exactly one room, at the time.
+
 
 
 #define MAX_PATIENTS_DAY 5 // Each nurse MAXIMUM patients in a working day.
 
 //we go for atomic approch this time for _counter_patient.
-//Prevents data races. Declared globaly, so all thread may compete to 
-//gain access. Wrapped in atomic object will make the variable thread save with no effort.
+//Prevents data races among threads. Declared globaly, so all thread may compete to gain access.
+//Wrapped in atomic object will make the variable thread save with no extra effort for the programmer.
 std::atomic<int> _patient_counter(0);
 
 //Active thread safe mechanism by using mutex.
+//Declared globally, so all threads can share both mutual exlusion objects.
 std::mutex g_cout_mutex;
 std::mutex off_duty_mutex;
 
 
 //global function. Need to be programmed with protection against race conditions.
 void print_turn(int _room, int _patient_counter) {
-    std::lock_guard<std::mutex> lock(g_cout_mutex);
+    
     {
+        std::lock_guard<std::mutex> lock(g_cout_mutex);
         cout << "patient:" << _patient_counter << " go to room number:" << _room << endl;
-    }//Here lock object, declared in the stack section of the process memory, gets destroyed becuase went out of scope. 
-    //Then, unlock function of g_cout_mutex object is called within the destructor function of lock_guard object lock. 
-    //This is the mecanishm we are using to prevent data race among threads.  
+    }//Here lock object, declared in the stack section of the process memory, gets destroyed. 
+    //The unlock function of g_cout_mutex object is called within the destructor function of lock_guard object. 
+    //This is the mecanishm we use to prevent data race among thread.  
 }
 
 class Room {
@@ -87,9 +90,9 @@ void manage_room(Room r) {
         r.working();
         ++i;
     }
-    //a random overkill, just for fun. Same duty and mechanism as print_turn function.
-    std::lock_guard<std::mutex> lock(off_duty_mutex);
+    //Same duty and mechanism as print_turn function.  
     {
+        std::lock_guard<std::mutex> lock(off_duty_mutex);
         cout << "The nurse from room number " << r.get_id() << ", now off duty" << endl;
     }
 }
