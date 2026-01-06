@@ -10,41 +10,35 @@ using namespace std;
 
 
 //----------------------------------------------------------------------
-//This is a simulation of the program runned by hospital de granollers
+//This is a simulation of the program runned by hospital de granollers (among other hospitals and institutions)
 //to perform blood tests of patients each day. 
 
 //Each room has a nurse in it. When a nurse ends dealing with patient,
 //asks to next patient to enter the room by pressing "next patient" button.
 //This step and the entair process is done asynchrounsly by each nurse in a room.
+//The action of pressing the "next patitent" is simulated with a timeout.
 
-//In this example, this process is simulated with a timeout.
+
 //Each worker thread represents a nurse in a room. 
 //The exact dealing time for each patient is not fixed. 
 //Effective working time for each patient goes within a range of 5-10seconds(just a simulation) 
-//Each nurse deals with exactly MAX_PATIENTS_DAY. After that, goes off duty.
+//This program is using C++11 standard library only.
+//This program garantees no race conditions.
 //----------------------------------------------------------------------
 
 
-//This program is using C++11 standard library only.
-//This program garantees no race conditions when asking a patient to go to a room. 
-//This means, only one patient goes to exactly one room, at the time.
+#define MAX_PATIENTS_DAY 5 // each nurse in a room will attend MAX_PATIENT per DAY.
 
-
-
-#define MAX_PATIENTS_DAY 5 // Each nurse MAXIMUM patients in a working day.
-
-//we go for atomic approch this time for _counter_patient.
-//Prevents data races among threads. Declared globaly, so all thread may compete to gain access.
-//Wrapped in atomic object will make the variable thread save with no extra effort for the programmer.
+//Declared globaly. So all thread can see and interact with the same instance.
+//By using atomic object help us preventing data races among threads. 
 std::atomic<int> _patient_counter(0);
 
 //Active thread safe mechanism by using mutex.
 //Declared globally, so all threads can share both mutual exlusion objects.
 std::mutex g_cout_mutex;
-std::mutex off_duty_mutex;
 
-
-//global function. Need to be programmed with protection against race conditions.
+//global function used by all the threads.
+//Need to be programmed with protection against race conditions.
 void print_turn(int _room, int _patient_counter) {
 
     {
@@ -89,11 +83,6 @@ void manage_room(Room r) {
         r.working();
         ++i;
     }
-    //Same duty and mechanism as print_turn function.  
-    {
-        std::lock_guard<std::mutex> lock(off_duty_mutex);
-        cout << "The nurse from room number " << r.get_id() << ", now off duty" << endl;
-    }
 }
 
 int main()
@@ -105,15 +94,17 @@ int main()
     vector<std::thread> _workers;
 
     for (int i = 0; i < _nrooms; ++i) {
-        Room _room(i); // declared by the main thread within is stack.
+        Room _room(i); // declared by the main thread within the stack.
         //later on, the ownership of room object is transfered to each thread's stack (std::move)
-        //threfore no need of object Room be thread safe. 
+        //threfore no need of object Room to be thread safe. 
         //This happens because each thread as is own Room. 
         _workers.push_back(std::thread(manage_room, std::move(_room)));
     }
 
     //Main thread waits to all worker threads to finish with their job.
-    //This is important to ensure neither Operating System nor C++ runtime mess up with the resources 
+    //This is important to ensure neither Operating System nor C++ runtime mess up with the resources,
+    //such as objects in memory used by the threads, calling destructors with no real control over it 
+    //and avoiding O.S "auto" clean ups . Overall avoid runtime exceptions regarding the use of threads.
     for (int i = 0; i < _nrooms; ++i) {
         if (_workers[i].joinable())
             _workers[i].join();
