@@ -46,7 +46,7 @@ std::mutex off_duty_mutex;
 
 //global function. Need to be programmed with protection against race conditions.
 void print_turn(int _room, int _patient_counter) {
-    
+
     {
         std::lock_guard<std::mutex> lock(g_cout_mutex);
         cout << "patient:" << _patient_counter << " go to room number:" << _room << endl;
@@ -58,8 +58,7 @@ void print_turn(int _room, int _patient_counter) {
 class Room {
 private:
     int id;
-    //NOT IMPORTANT. Just for simulation. 
-    //Pressing the "next patient button" on the client app is done manually by each room's nurse 
+    //NOT IMPORTANT. Simulates when the nurse has pressed the "next patient button". 
     //Effective working time is simulated with a sleep for each thread (nurse).
     std::mt19937 generator;
     std::uniform_int_distribution<int> distribution;
@@ -100,7 +99,7 @@ void manage_room(Room r) {
 int main()
 {
     int _nrooms;
-    cout << "how much rooms do you have in your hospital?" << endl;
+    cout << "How much rooms do you have in your hospital to perfom blood tests?" << endl;
     cin >> _nrooms;
 
     vector<std::thread> _workers;
@@ -108,15 +107,13 @@ int main()
     for (int i = 0; i < _nrooms; ++i) {
         Room _room(i); // declared by the main thread within is stack.
         //later on, the ownership of room object is transfered to each thread's stack (std::move)
-        //threfore no need of object Room be formaly and fully thread safe. 
-        //This happens because each thread as is own  
+        //threfore no need of object Room be thread safe. 
+        //This happens because each thread as is own Room. 
         _workers.push_back(std::thread(manage_room, std::move(_room)));
     }
 
     //Main thread waits to all worker threads to finish with their job.
-    //This is important to ensure neither Operating System, nor C++ runtime
-    //Mess up with the resources, i.e room object among others objects, 
-    //while being used by the worker threads
+    //This is important to ensure neither Operating System nor C++ runtime mess up with the resources 
     for (int i = 0; i < _nrooms; ++i) {
         if (_workers[i].joinable())
             _workers[i].join();
