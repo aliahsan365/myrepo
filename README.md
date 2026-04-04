@@ -12,4 +12,13 @@ NOTE: For security reasons restore windows's 'Execution Policy' to default after
     Set-ExecutionPolicy Restricted
 
 
+### TODO:
+
+1.Dictionary generator to crack Wi-Fi WEP encryption.
+2.Inefficent SAT-SOLVER (truth table, always exponential algorithm).
+
+
+	
+
+
 
