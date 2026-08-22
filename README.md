@@ -6,13 +6,6 @@ The main exception to the standalone exercise format is [`2014/May/Organismos`](
 
 ## Code Catalog
 
-### Root Scripts
-
-| File | Date | Language | What it does | How it works |
-| --- | --- | --- | --- | --- |
-| [`crear_carpetas.ps1`](crear_carpetas.ps1) | 2025-04-20 | PowerShell | Creates the repository's chronological directory hierarchy from 2012 through the current date. | Iterates over years and months, obtains their names with `CultureInfo`, and creates each path using `Test-Path`, `Join-Path`, and `New-Item`. |
-| [`add_gitkeep.ps1`](add_gitkeep.ps1) | 2024-08-04 | PowerShell | Keeps the directory structure under version control. | Recursively scans the base path and adds the marker used by Git where appropriate. |
-
 ### 2013
 
 | File | Date | Language | What it does | How it works |
