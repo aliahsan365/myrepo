@@ -1,8 +1,6 @@
 # Programming Exercise Archive
 
-This repository contains exercises, coursework, and experiments written between 2013 and 2026. Each source file is generally independent, and the repository is organized chronologically by year and month. It includes C, C++, x86 assembly, Haskell, Prolog, Python, and PowerShell.
-
-The main exception to the standalone exercise format is [`2014/May/Organismos`](2014/May/Organismos), a C++ project split into several modules.
+This repository contains codes written by me since 2012. The repository is organized chronologically by year and month. It includes C, C++, x86 assembly, Haskell, Prolog and Python code.
 
 ## Code Catalog
 
